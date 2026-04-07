@@ -1,0 +1,30 @@
+import { Navigate, Outlet } from 'react-router-dom';
+import { useAuth } from './AuthContext';
+
+interface ProtectedRouteProps {
+  requireAuth?: boolean;
+  requireAdmin?: boolean;
+}
+
+const ProtectedRoute = ({ requireAuth = true, requireAdmin = false }: ProtectedRouteProps) => {
+  const { user, isAdmin, isPatientPortalEnabled } = useAuth();
+
+  // If patient portal is disabled by admin
+  if (requireAuth && !isPatientPortalEnabled) {
+    return <Navigate to="/" replace />;
+  }
+
+  // If login is required but user is not logged in
+  if (requireAuth && !user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  // If admin route but user is not admin
+  if (requireAdmin && !isAdmin) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return <Outlet />;
+};
+
+export default ProtectedRoute;
